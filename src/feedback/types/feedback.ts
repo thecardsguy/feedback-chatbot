@@ -87,6 +87,7 @@ export interface FeedbackConfig {
   ai: {
     enabled: boolean;
     provider?: 'lovable' | 'openai';
+    demoMode?: boolean; // Use mock AI responses for testing
     summarize: boolean;
     categorize: boolean;
     generateDevPrompt: boolean;

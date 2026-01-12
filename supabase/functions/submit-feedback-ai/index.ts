@@ -18,6 +18,7 @@ interface FeedbackPayload {
   page_url?: string;
   target_element?: Record<string, unknown>;
   device_type?: string;
+  demo_mode?: boolean; // New: Request demo mode for testing
 }
 
 interface AIEnhancement {
@@ -25,6 +26,56 @@ interface AIEnhancement {
   ai_category: string | null;
   ai_question_for_dev: string | null;
 }
+
+// ============================================
+// DEMO MODE - Mock AI Responses
+// ============================================
+
+const DEMO_RESPONSES = {
+  bug: {
+    summary: "User reports a bug that needs investigation. The issue appears to be related to functionality not working as expected.",
+    category: "bug",
+    question: "What specific steps led to this bug, and can you reproduce it consistently?",
+  },
+  feature: {
+    summary: "User is requesting a new feature or enhancement to improve their experience.",
+    category: "feature_request",
+    question: "How would this feature improve the user experience, and what's the expected behavior?",
+  },
+  ui_ux: {
+    summary: "User has identified a UI/UX issue that affects usability or visual presentation.",
+    category: "ux_issue",
+    question: "Which specific element or interaction should be improved, and what would be the ideal behavior?",
+  },
+  suggestion: {
+    summary: "User has provided a helpful suggestion for improving the application.",
+    category: "improvement",
+    question: "How should this suggestion be prioritized relative to other improvements?",
+  },
+  other: {
+    summary: "User has provided general feedback about their experience with the application.",
+    category: "other",
+    question: "What additional context would help address this feedback effectively?",
+  },
+};
+
+function getDemoAIResponse(category: string, rawText: string): AIEnhancement {
+  const response = DEMO_RESPONSES[category as keyof typeof DEMO_RESPONSES] || DEMO_RESPONSES.other;
+  
+  // Add some variety based on the raw text
+  const textLength = rawText.length;
+  const urgencyWord = textLength > 100 ? "detailed" : "brief";
+  
+  return {
+    ai_summary: `[DEMO] ${response.summary} This is a ${urgencyWord} ${category} submission.`,
+    ai_category: response.category,
+    ai_question_for_dev: `[DEMO] ${response.question}`,
+  };
+}
+
+// ============================================
+// VALIDATION & HELPERS
+// ============================================
 
 function sanitizeText(text: string): string {
   return text
@@ -49,7 +100,7 @@ function validatePayload(payload: unknown): { valid: boolean; data?: FeedbackPay
     return { valid: false, error: `Feedback text exceeds maximum length of ${MAX_TEXT_LENGTH} characters` };
   }
 
-  const validCategories = ['bug', 'feature', 'improvement', 'question', 'other'];
+  const validCategories = ['bug', 'feature', 'improvement', 'question', 'other', 'ui_ux', 'suggestion'];
   const validSeverities = ['low', 'medium', 'high', 'critical'];
 
   return {
@@ -61,6 +112,7 @@ function validatePayload(payload: unknown): { valid: boolean; data?: FeedbackPay
       page_url: typeof p.page_url === 'string' ? p.page_url.slice(0, 2000) : undefined,
       target_element: typeof p.target_element === 'object' ? p.target_element as Record<string, unknown> : undefined,
       device_type: typeof p.device_type === 'string' ? p.device_type.slice(0, 50) : undefined,
+      demo_mode: p.demo_mode === true,
     },
   };
 }
@@ -90,12 +142,22 @@ function getClientIP(req: Request): string {
          'unknown';
 }
 
+// ============================================
+// AI ENHANCEMENT
+// ============================================
+
 async function enhanceWithAI(feedbackData: FeedbackPayload): Promise<AIEnhancement> {
+  // If demo mode is requested, return mock response
+  if (feedbackData.demo_mode) {
+    console.log('Demo mode requested - returning mock AI response');
+    return getDemoAIResponse(feedbackData.category || 'other', feedbackData.raw_text);
+  }
+
   const apiKey = Deno.env.get('LOVABLE_API_KEY');
   
   if (!apiKey) {
-    console.log('No LOVABLE_API_KEY found, skipping AI enhancement');
-    return { ai_summary: null, ai_category: null, ai_question_for_dev: null };
+    console.log('No LOVABLE_API_KEY found, falling back to demo mode');
+    return getDemoAIResponse(feedbackData.category || 'other', feedbackData.raw_text);
   }
 
   try {
@@ -126,7 +188,7 @@ Respond in JSON format:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-3-flash-preview',
         messages: [
           {
             role: 'system',
@@ -147,20 +209,21 @@ Respond in JSON format:
 
     if (!response.ok) {
       console.error('AI API error:', response.status);
-      return { ai_summary: null, ai_category: null, ai_question_for_dev: null };
+      // Fallback to demo mode on error
+      return getDemoAIResponse(feedbackData.category || 'other', feedbackData.raw_text);
     }
 
     const result = await response.json();
     const content = result.choices?.[0]?.message?.content;
 
     if (!content) {
-      return { ai_summary: null, ai_category: null, ai_question_for_dev: null };
+      return getDemoAIResponse(feedbackData.category || 'other', feedbackData.raw_text);
     }
 
     // Parse JSON from response
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      return { ai_summary: null, ai_category: null, ai_question_for_dev: null };
+      return getDemoAIResponse(feedbackData.category || 'other', feedbackData.raw_text);
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
@@ -172,9 +235,14 @@ Respond in JSON format:
     };
   } catch (error) {
     console.error('AI enhancement error:', error);
-    return { ai_summary: null, ai_category: null, ai_question_for_dev: null };
+    // Fallback to demo mode on any error
+    return getDemoAIResponse(feedbackData.category || 'other', feedbackData.raw_text);
   }
 }
+
+// ============================================
+// MAIN HANDLER
+// ============================================
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -202,6 +270,7 @@ serve(async (req) => {
     }
 
     const feedbackData = validation.data!;
+    const isDemoMode = feedbackData.demo_mode || !Deno.env.get('LOVABLE_API_KEY');
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -218,19 +287,21 @@ serve(async (req) => {
       userId = user?.id || null;
     }
 
-    // Rate limiting
-    const identifier = userId || getClientIP(req);
-    const rateLimit = await checkRateLimit(supabase, identifier);
+    // Rate limiting (skip for demo mode)
+    if (!isDemoMode) {
+      const identifier = userId || getClientIP(req);
+      const rateLimit = await checkRateLimit(supabase, identifier);
 
-    if (!rateLimit.allowed) {
-      return new Response(
-        JSON.stringify({
-          error: 'Rate limit exceeded',
-          remaining: 0,
-          reset_in: '1 hour',
-        }),
-        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      if (!rateLimit.allowed) {
+        return new Response(
+          JSON.stringify({
+            error: 'Rate limit exceeded',
+            remaining: 0,
+            reset_in: '1 hour',
+          }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     // Enhance with AI
@@ -241,6 +312,7 @@ serve(async (req) => {
       ip: getClientIP(req),
       user_agent: req.headers.get('user-agent'),
       ai_enhanced: !!(aiEnhancement.ai_summary || aiEnhancement.ai_category),
+      demo_mode: isDemoMode,
     };
 
     // Insert feedback
@@ -274,7 +346,8 @@ serve(async (req) => {
         success: true,
         id: data.id,
         ai_enhanced: context.ai_enhanced,
-        rate_limit_remaining: rateLimit.remaining - 1,
+        demo_mode: isDemoMode,
+        rate_limit_remaining: isDemoMode ? 999 : undefined,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

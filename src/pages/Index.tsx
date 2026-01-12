@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { FeedbackButton } from '@/feedback';
 import { STANDARD_PRESET } from '@/feedback/config/feedback.config';
-import { MessageSquare, Zap, Shield, Sparkles, ArrowRight, MousePointer2, CreditCard, Clock, Bot } from 'lucide-react';
+import { MessageSquare, Zap, Shield, Sparkles, ArrowRight, MousePointer2, CreditCard, Clock, Bot, Play, CheckCircle, Loader2, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -9,6 +10,50 @@ const Index = () => {
     ...STANDARD_PRESET,
     appName: 'Feedback Chatbot Demo',
     position: 'bottom-right' as const,
+  };
+
+  const [isDemoSubmitting, setIsDemoSubmitting] = useState(false);
+  const [demoResult, setDemoResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const handleDemoSubmit = async () => {
+    setIsDemoSubmitting(true);
+    setDemoResult(null);
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/submit-feedback-ai`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          raw_text: 'Demo: The hero section could use better contrast on mobile devices.',
+          category: 'ui_ux',
+          severity: 'medium',
+          page_url: window.location.href,
+          demo_mode: true, // Use demo mode - no credits consumed
+        }),
+      });
+      const data = await response.json();
+      if (data.success || data.id) {
+        setDemoResult({
+          success: true,
+          message: 'Demo submission successful! Check the admin dashboard to see it.',
+        });
+      } else {
+        setDemoResult({
+          success: false,
+          message: data.error || 'Demo submission failed',
+        });
+      }
+    } catch (error) {
+      setDemoResult({
+        success: false,
+        message: 'Failed to connect. Check your setup.',
+      });
+    } finally {
+      setIsDemoSubmitting(false);
+    }
   };
 
   return (
@@ -38,12 +83,89 @@ const Index = () => {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline">
-              Try the Feedback Button →
+            <Button size="lg" variant="outline" asChild>
+              <Link to="/setup">
+                <Settings className="w-4 h-4 mr-2" />
+                Setup Wizard
+              </Link>
             </Button>
           </div>
         </div>
       </header>
+
+      {/* Interactive Demo Section - NEW */}
+      <section className="bg-gradient-to-b from-primary/5 to-background border-y border-border">
+        <div className="max-w-6xl mx-auto px-6 py-16">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/10 text-green-600 mb-4">
+              <Play className="w-4 h-4" />
+              <span className="text-sm font-medium">Interactive Demo</span>
+            </div>
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              Try It Without Using Credits
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Test the full AI-powered feedback flow in demo mode. 
+              No API credits are consumed - perfect for exploring the template.
+            </p>
+          </div>
+
+          <div className="max-w-md mx-auto">
+            <div className="bg-card border border-border rounded-2xl p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Bot className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold text-card-foreground mb-2">
+                Demo AI Submission
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Submits a sample feedback with AI-generated summary, category, and developer question (using mock responses).
+              </p>
+              
+              <Button 
+                onClick={handleDemoSubmit}
+                disabled={isDemoSubmitting}
+                className="w-full mb-4"
+                size="lg"
+              >
+                {isDemoSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Submitting Demo...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    Try Demo Submission
+                  </>
+                )}
+              </Button>
+
+              {demoResult && (
+                <div className={`p-4 rounded-lg ${demoResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                  <div className="flex items-center justify-center gap-2">
+                    {demoResult.success ? (
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                    ) : null}
+                    <p className={`font-medium ${demoResult.success ? 'text-green-700' : 'text-red-700'}`}>
+                      {demoResult.message}
+                    </p>
+                  </div>
+                  {demoResult.success && (
+                    <Link to="/admin" className="text-sm text-green-600 hover:underline mt-2 inline-block">
+                      View in Admin Dashboard →
+                    </Link>
+                  )}
+                </div>
+              )}
+
+              <p className="text-xs text-muted-foreground mt-4">
+                💡 Demo mode uses pre-generated AI responses. Connect Lovable Cloud for real AI.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Perfect for Lovable Users Section */}
       <section className="bg-primary/5 border-y border-border">
