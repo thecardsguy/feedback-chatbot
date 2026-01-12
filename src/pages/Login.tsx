@@ -2,6 +2,7 @@
  * Login Page
  * 
  * Simple email/password login for admin access.
+ * SECURITY: Input validation with zod schema
  */
 
 import { useState } from 'react';
@@ -13,6 +14,20 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, ArrowLeft, Shield } from 'lucide-react';
+import { z } from 'zod';
+
+// SECURITY: Strict input validation schema
+const loginSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email({ message: 'Please enter a valid email address' })
+    .max(255, { message: 'Email must be less than 255 characters' }),
+  password: z
+    .string()
+    .min(1, { message: 'Password is required' })
+    .max(128, { message: 'Password must be less than 128 characters' }),
+});
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -25,10 +40,18 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // SECURITY: Validate all inputs before submission
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(validation.data.email, validation.data.password);
       if (error) {
         setError(error.message);
       } else {
