@@ -277,7 +277,7 @@ import { STANDARD_PRESET } from '@/feedback/config/feedback.config';
         <div className="max-w-6xl mx-auto px-6 text-center text-muted-foreground">
           <p>
             Feedback Chatbot • MIT License • 
-            <a href="https://github.com/thecardsguy/feedback-spark" className="text-primary hover:underline ml-1">
+            <a href="https://github.com/thecardsguy/feedback-chatbot" className="text-primary hover:underline ml-1">
               View on GitHub
             </a>
           </p>
