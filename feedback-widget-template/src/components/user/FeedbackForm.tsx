@@ -1,14 +1,10 @@
 /**
  * Feedback Widget Template - Feedback Form
  * 
- * The main form for submitting feedback. Supports:
- * - Text input
- * - Category selection (optional)
- * - Severity selection (optional)
- * - Element targeting (optional)
+ * Clean form with dark mode support. Supports categories, severity, and element targeting.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { ElementPicker } from './ElementPicker';
 import type { 
   FeedbackFormProps, 
@@ -19,7 +15,7 @@ import type {
 } from '../../types/feedback';
 
 // ============================================
-// ICONS (inline SVG for portability)
+// ICONS
 // ============================================
 
 const Icons = {
@@ -31,7 +27,7 @@ const Icons = {
     </svg>
   ),
   X: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
@@ -42,32 +38,86 @@ const Icons = {
       <polygon points="22 2 15 22 11 13 2 9 22 2" />
     </svg>
   ),
-  Loader: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
-      <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
-      <path d="M12 2a10 10 0 0 1 10 10" />
+  Sparkles: () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
     </svg>
   ),
 };
 
 // ============================================
-// CATEGORY OPTIONS
+// DARK MODE DETECTION
+// ============================================
+
+function useIsDarkMode(): boolean {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const html = document.documentElement;
+      const isDarkMode = 
+        html.classList.contains('dark') || 
+        html.getAttribute('data-theme') === 'dark' ||
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDark(isDarkMode);
+    };
+
+    checkDarkMode();
+    
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, { 
+      attributes: true, 
+      attributeFilter: ['class', 'data-theme'] 
+    });
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkDarkMode);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', checkDarkMode);
+    };
+  }, []);
+
+  return isDark;
+}
+
+// ============================================
+// OPTIONS
 // ============================================
 
 const CATEGORIES: { value: FeedbackCategory; label: string; emoji: string }[] = [
   { value: 'bug', label: 'Bug', emoji: '🐛' },
   { value: 'feature', label: 'Feature', emoji: '✨' },
-  { value: 'ui_ux', label: 'UI/UX', emoji: '🎨' },
+  { value: 'ui_ux', label: 'Design', emoji: '🎨' },
   { value: 'suggestion', label: 'Idea', emoji: '💡' },
   { value: 'other', label: 'Other', emoji: '📝' },
 ];
 
 const SEVERITIES: { value: FeedbackSeverity; label: string; color: string }[] = [
-  { value: 'low', label: 'Low', color: '#22c55e' },
-  { value: 'medium', label: 'Medium', color: '#eab308' },
-  { value: 'high', label: 'High', color: '#f97316' },
+  { value: 'low', label: 'Minor', color: '#22c55e' },
+  { value: 'medium', label: 'Medium', color: '#f59e0b' },
+  { value: 'high', label: 'Major', color: '#f97316' },
   { value: 'critical', label: 'Critical', color: '#ef4444' },
 ];
+
+// ============================================
+// THEME HELPER
+// ============================================
+
+const getTheme = (isDark: boolean) => ({
+  text: isDark ? '#f9fafb' : '#111827',
+  textMuted: isDark ? '#9ca3af' : '#6b7280',
+  textSecondary: isDark ? '#d1d5db' : '#374151',
+  bg: isDark ? '#1f2937' : '#ffffff',
+  bgSecondary: isDark ? '#374151' : '#f9fafb',
+  bgHover: isDark ? '#4b5563' : '#f3f4f6',
+  border: isDark ? '#4b5563' : '#e5e7eb',
+  borderLight: isDark ? '#374151' : '#d1d5db',
+  primary: '#3b82f6',
+  primaryBg: isDark ? '#1e3a5f' : '#eff6ff',
+  primaryBorder: isDark ? '#3b82f6' : '#bfdbfe',
+});
 
 // ============================================
 // FEEDBACK FORM COMPONENT
@@ -79,6 +129,8 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
   const [severity, setSeverity] = useState<FeedbackSeverity>('medium');
   const [targetElement, setTargetElement] = useState<TargetElement | null>(null);
   const [isPickingElement, setIsPickingElement] = useState(false);
+  const isDarkMode = useIsDarkMode();
+  const theme = getTheme(isDarkMode);
 
   const handleElementSelect = useCallback((element: TargetElement) => {
     setTargetElement(element);
@@ -87,7 +139,6 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!text.trim()) return;
 
     const submission: FeedbackSubmission = {
@@ -101,14 +152,24 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
     await onSubmit(submission);
   };
 
-  const clearTargetElement = () => setTargetElement(null);
+  const buttonColor = config.buttonColor || '#3b82f6';
+
+  const styles = getStyles(theme);
 
   return (
     <>
       <form onSubmit={handleSubmit} style={styles.form}>
         {/* Header */}
         <div style={styles.header}>
-          <h3 style={styles.title}>Send Feedback</h3>
+          <div style={styles.headerLeft}>
+            <h3 style={styles.title}>Send Feedback</h3>
+            {config.ai?.enabled && (
+              <span style={styles.aiBadge}>
+                <Icons.Sparkles />
+                <span>AI</span>
+              </span>
+            )}
+          </div>
           <button type="button" onClick={onCancel} style={styles.closeButton}>
             <Icons.X />
           </button>
@@ -117,20 +178,21 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
         {/* Category selector */}
         {config.features.categories && (
           <div style={styles.section}>
-            <label style={styles.label}>Category</label>
+            <label style={styles.label}>Type</label>
             <div style={styles.categoryGrid}>
-              {CATEGORIES.map(cat => (
+              {CATEGORIES.map((cat) => (
                 <button
                   key={cat.value}
                   type="button"
                   onClick={() => setCategory(cat.value)}
                   style={{
                     ...styles.categoryButton,
-                    ...(category === cat.value ? styles.categoryButtonActive : {}),
+                    borderColor: category === cat.value ? theme.primary : 'transparent',
+                    backgroundColor: category === cat.value ? theme.primaryBg : theme.bgSecondary,
                   }}
                 >
-                  <span>{cat.emoji}</span>
-                  <span>{cat.label}</span>
+                  <span style={{ fontSize: 16 }}>{cat.emoji}</span>
+                  <span style={styles.categoryLabel}>{cat.label}</span>
                 </button>
               ))}
             </div>
@@ -140,26 +202,21 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
         {/* Severity selector */}
         {config.features.severityLevels && (
           <div style={styles.section}>
-            <label style={styles.label}>Severity</label>
+            <label style={styles.label}>Priority</label>
             <div style={styles.severityGrid}>
-              {SEVERITIES.map(sev => (
+              {SEVERITIES.map((sev) => (
                 <button
                   key={sev.value}
                   type="button"
                   onClick={() => setSeverity(sev.value)}
                   style={{
                     ...styles.severityButton,
-                    borderColor: severity === sev.value ? sev.color : 'transparent',
-                    backgroundColor: severity === sev.value ? `${sev.color}20` : 'transparent',
+                    borderColor: severity === sev.value ? sev.color : theme.border,
+                    backgroundColor: severity === sev.value ? `${sev.color}15` : 'transparent',
+                    color: severity === sev.value ? sev.color : theme.textMuted,
                   }}
                 >
-                  <span style={{ 
-                    width: 8, 
-                    height: 8, 
-                    borderRadius: '50%', 
-                    backgroundColor: sev.color 
-                  }} />
-                  <span>{sev.label}</span>
+                  {sev.label}
                 </button>
               ))}
             </div>
@@ -168,10 +225,13 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
 
         {/* Feedback text */}
         <div style={styles.section}>
-          <label style={styles.label}>Your feedback</label>
+          <label style={styles.label}>
+            Your feedback
+            <span style={styles.charCount}>{text.length}/500</span>
+          </label>
           <textarea
             value={text}
-            onChange={e => setText(e.target.value)}
+            onChange={e => setText(e.target.value.slice(0, 500))}
             placeholder="Describe your feedback, issue, or suggestion..."
             style={styles.textarea}
             rows={4}
@@ -185,10 +245,17 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
             {targetElement ? (
               <div style={styles.elementPreview}>
                 <div style={styles.elementInfo}>
-                  <span style={styles.elementTag}>&lt;{targetElement.tagName}&gt;</span>
-                  <span style={styles.elementText}>{targetElement.textPreview || 'No text'}</span>
+                  <Icons.Target />
+                  <span style={styles.elementTag}>{targetElement.tagName.toLowerCase()}</span>
+                  <span style={styles.elementText}>
+                    {targetElement.textPreview || 'Element selected'}
+                  </span>
                 </div>
-                <button type="button" onClick={clearTargetElement} style={styles.removeButton}>
+                <button 
+                  type="button" 
+                  onClick={() => setTargetElement(null)} 
+                  style={styles.removeButton}
+                >
                   <Icons.X />
                 </button>
               </div>
@@ -199,7 +266,7 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
                 style={styles.pickElementButton}
               >
                 <Icons.Target />
-                <span>Target an element</span>
+                <span>Target a specific element</span>
               </button>
             )}
           </div>
@@ -211,11 +278,16 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
           disabled={!text.trim() || isSubmitting}
           style={{
             ...styles.submitButton,
-            opacity: !text.trim() || isSubmitting ? 0.5 : 1,
+            backgroundColor: !text.trim() || isSubmitting ? theme.border : buttonColor,
+            cursor: !text.trim() || isSubmitting ? 'not-allowed' : 'pointer',
           }}
         >
-          {isSubmitting ? <Icons.Loader /> : <Icons.Send />}
-          <span>{isSubmitting ? 'Sending...' : 'Send Feedback'}</span>
+          {isSubmitting ? (
+            <div style={styles.spinner} />
+          ) : (
+            <Icons.Send />
+          )}
+          <span>{isSubmitting ? 'Sending...' : 'Submit'}</span>
         </button>
       </form>
 
@@ -230,36 +302,53 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
 }
 
 // ============================================
-// STYLES
+// STYLES FACTORY
 // ============================================
 
-const styles: Record<string, React.CSSProperties> = {
+const getStyles = (theme: ReturnType<typeof getTheme>): Record<string, React.CSSProperties> => ({
   form: {
     display: 'flex',
     flexDirection: 'column',
     gap: 16,
-    padding: 16,
+    padding: 20,
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  headerLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+  },
   title: {
     margin: 0,
     fontSize: 18,
     fontWeight: 600,
+    color: theme.text,
+  },
+  aiBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+    padding: '2px 8px',
+    fontSize: 11,
+    fontWeight: 600,
+    background: theme.primary,
+    color: 'white',
+    borderRadius: 12,
   },
   closeButton: {
-    background: 'none',
+    background: 'transparent',
     border: 'none',
     cursor: 'pointer',
-    padding: 4,
+    padding: 8,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 4,
-    color: '#6b7280',
+    borderRadius: 6,
+    color: theme.textMuted,
   },
   section: {
     display: 'flex',
@@ -267,111 +356,120 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 8,
   },
   label: {
-    fontSize: 12,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontSize: 13,
     fontWeight: 500,
-    color: '#6b7280',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
+    color: theme.textSecondary,
+  },
+  charCount: {
+    fontSize: 12,
+    color: theme.textMuted,
+    fontWeight: 400,
   },
   categoryGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(5, 1fr)',
-    gap: 8,
+    gap: 6,
   },
   categoryButton: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     gap: 4,
-    padding: '8px 4px',
-    border: '1px solid #e5e7eb',
+    padding: '10px 4px',
+    border: '2px solid transparent',
     borderRadius: 8,
-    background: 'none',
     cursor: 'pointer',
-    fontSize: 11,
     transition: 'all 0.15s',
   },
-  categoryButtonActive: {
-    borderColor: '#3b82f6',
-    backgroundColor: '#eff6ff',
+  categoryLabel: {
+    fontSize: 10,
+    fontWeight: 500,
+    color: theme.textMuted,
   },
   severityGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, 1fr)',
-    gap: 8,
+    gap: 6,
   },
   severityButton: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    padding: '8px 12px',
-    border: '2px solid transparent',
-    borderRadius: 8,
-    background: 'none',
+    padding: '8px 10px',
+    border: '1px solid',
+    borderRadius: 6,
+    background: 'transparent',
     cursor: 'pointer',
+    transition: 'all 0.15s',
     fontSize: 12,
     fontWeight: 500,
-    transition: 'all 0.15s',
   },
   textarea: {
     width: '100%',
     padding: 12,
-    border: '1px solid #e5e7eb',
+    border: `1px solid ${theme.border}`,
     borderRadius: 8,
     fontSize: 14,
-    resize: 'vertical',
+    lineHeight: 1.5,
+    resize: 'none',
     fontFamily: 'inherit',
+    outline: 'none',
+    backgroundColor: theme.bgSecondary,
+    color: theme.text,
+    boxSizing: 'border-box',
   },
   pickElementButton: {
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
-    padding: '10px 16px',
-    border: '1px dashed #d1d5db',
+    padding: '12px 16px',
+    border: `1px dashed ${theme.borderLight}`,
     borderRadius: 8,
-    background: 'none',
+    background: 'transparent',
     cursor: 'pointer',
     fontSize: 13,
-    color: '#6b7280',
+    color: theme.textMuted,
     transition: 'all 0.15s',
     width: '100%',
-    justifyContent: 'center',
   },
   elementPreview: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '10px 12px',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: theme.primaryBg,
+    border: `1px solid ${theme.primaryBorder}`,
     borderRadius: 8,
   },
   elementInfo: {
     display: 'flex',
     alignItems: 'center',
     gap: 8,
-    overflow: 'hidden',
+    color: theme.primary,
   },
   elementTag: {
-    fontSize: 12,
     fontWeight: 600,
-    color: '#3b82f6',
-    fontFamily: 'monospace',
+    fontSize: 13,
   },
   elementText: {
     fontSize: 12,
-    color: '#6b7280',
+    color: theme.textMuted,
+    maxWidth: 150,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
   removeButton: {
-    background: 'none',
+    background: 'transparent',
     border: 'none',
     cursor: 'pointer',
     padding: 4,
     display: 'flex',
-    color: '#6b7280',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 4,
+    color: theme.textMuted,
   },
   submitButton: {
     display: 'flex',
@@ -379,15 +477,22 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     gap: 8,
     padding: '12px 16px',
-    backgroundColor: '#3b82f6',
-    color: 'white',
     border: 'none',
     borderRadius: 8,
     fontSize: 14,
-    fontWeight: 500,
-    cursor: 'pointer',
-    transition: 'opacity 0.15s',
+    fontWeight: 600,
+    color: 'white',
+    transition: 'all 0.15s',
+    marginTop: 4,
   },
-};
+  spinner: {
+    width: 16,
+    height: 16,
+    border: '2px solid rgba(255,255,255,0.3)',
+    borderTopColor: 'white',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+});
 
 export default FeedbackForm;
