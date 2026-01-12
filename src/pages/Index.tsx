@@ -142,17 +142,17 @@ const Index = () => {
               </Button>
 
               {demoResult && (
-                <div className={`p-4 rounded-lg ${demoResult.success ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                <div className={`p-4 rounded-lg ${demoResult.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-destructive/10 border border-destructive/20'}`}>
                   <div className="flex items-center justify-center gap-2">
                     {demoResult.success ? (
                       <CheckCircle className="w-5 h-5 text-green-500" />
                     ) : null}
-                    <p className={`font-medium ${demoResult.success ? 'text-green-700' : 'text-red-700'}`}>
+                    <p className={`font-medium ${demoResult.success ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>
                       {demoResult.message}
                     </p>
                   </div>
                   {demoResult.success && (
-                    <Link to="/admin" className="text-sm text-green-600 hover:underline mt-2 inline-block">
+                    <Link to="/admin" className="text-sm text-green-600 dark:text-green-400 hover:underline mt-2 inline-block">
                       View in Admin Dashboard →
                     </Link>
                   )}

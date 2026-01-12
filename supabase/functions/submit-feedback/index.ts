@@ -24,6 +24,12 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
 
+    // Build context (DO NOT store IP addresses for privacy/GDPR compliance)
+    const context = {
+      user_agent: req.headers.get('user-agent'),
+      submitted_at: new Date().toISOString(),
+    };
+
     const { data: feedback, error } = await supabase
       .from('feedback')
       .insert({
@@ -34,6 +40,7 @@ Deno.serve(async (req) => {
         target_element: payload.target_element,
         device_type: payload.device_type,
         status: 'pending',
+        context,
       })
       .select('id, created_at')
       .single()
