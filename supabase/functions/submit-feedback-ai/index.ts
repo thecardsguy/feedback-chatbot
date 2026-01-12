@@ -307,12 +307,12 @@ serve(async (req) => {
     // Enhance with AI
     const aiEnhancement = await enhanceWithAI(feedbackData);
 
-    // Build context
+    // Build context (DO NOT store IP addresses for privacy/GDPR compliance)
     const context = {
-      ip: getClientIP(req),
       user_agent: req.headers.get('user-agent'),
       ai_enhanced: !!(aiEnhancement.ai_summary || aiEnhancement.ai_category),
       demo_mode: isDemoMode,
+      submitted_at: new Date().toISOString(),
     };
 
     // Insert feedback

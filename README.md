@@ -310,25 +310,71 @@ The `FeedbackButton` component accepts standard className props:
 
 ## 🔐 Security
 
-- **Row Level Security (RLS)** — All database tables have RLS enabled
-- **Input Validation** — All feedback is sanitized before storage
-- **Rate Limiting** — Edge functions include rate limiting protection
-- **No Secrets in Code** — API keys stored securely in environment
+This template is designed with **production-ready security** in mind:
 
-### Adjusting RLS Policies
+### Security Features
 
-For stricter access control, modify the policies:
+| Feature | Description |
+|---------|-------------|
+| **Row Level Security (RLS)** | All database tables have RLS enabled with proper policies |
+| **Admin Authentication** | `admin_users` table controls who can view/manage all feedback |
+| **Input Validation** | All feedback is sanitized and validated before storage |
+| **Rate Limiting** | Edge functions include rate limiting (10/hour per user/IP) |
+| **No IP Logging** | IP addresses are NOT stored (GDPR compliant) |
+| **No Secrets in Code** | API keys stored securely in environment variables |
+| **CORS Configuration** | Edge functions have proper CORS headers |
+
+### Admin Access Control
+
+The template uses an `admin_users` table for role-based access:
+
+```sql
+-- Add yourself as an admin (run in Supabase SQL editor)
+INSERT INTO public.admin_users (user_id)
+VALUES ('YOUR_USER_ID_HERE');
+
+-- Find your user_id in Authentication > Users
+```
+
+### Demo Mode Security
+
+The admin dashboard includes a **demo mode** for testing. In production:
+
+1. Set `demoMode={false}` in `src/pages/Admin.tsx`
+2. Add your user_id to the `admin_users` table
+3. Implement authentication (see `src/hooks/useAdmin.ts`)
+
+### RLS Policies
+
+The template includes these security policies:
+
+```sql
+-- Anyone can submit feedback (anonymous allowed)
+CREATE POLICY "Anyone can submit feedback"
+  ON public.feedback FOR INSERT
+  WITH CHECK ((user_id IS NULL) OR (user_id = auth.uid()));
+
+-- Admins can view ALL feedback
+CREATE POLICY "Admins can view all feedback"
+  ON public.feedback FOR SELECT
+  USING (auth.uid() = user_id OR public.is_admin());
+
+-- Only admins can update/delete feedback
+CREATE POLICY "Admins can update all feedback"
+  ON public.feedback FOR UPDATE
+  USING (public.is_admin());
+```
+
+### Stricter Security (Optional)
+
+For production apps, consider these additional policies:
 
 ```sql
 -- Only authenticated users can submit
+DROP POLICY "Anyone can submit feedback" ON public.feedback;
 CREATE POLICY "Authenticated users can submit feedback"
   ON public.feedback FOR INSERT
   WITH CHECK (auth.uid() IS NOT NULL);
-
--- Only admins can view feedback
-CREATE POLICY "Admins can view feedback"
-  ON public.feedback FOR SELECT
-  USING (auth.uid() IN (SELECT user_id FROM admins));
 ```
 
 ---
