@@ -2,10 +2,15 @@
 
 > **A template for the AI Feedback Chatbot system** — Drop this into any React + Supabase project to collect, organize, and act on user feedback. AI interprets issues and generates prompts you can paste directly into Lovable.
 
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_App-blue?style=for-the-badge)](https://feedback-chatbot.lovable.app)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/thecardsguy/feedback-chatbot)
+
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 ![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)
 ![Supabase](https://img.shields.io/badge/Supabase-Ready-3ecf8e.svg)
+![Lovable](https://img.shields.io/badge/Made_with-Lovable-ff69b4.svg)
 
 ---
 
