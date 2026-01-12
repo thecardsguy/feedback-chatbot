@@ -8,7 +8,7 @@ import elementPickerDemo from '@/assets/element-picker-demo.mp4';
 const Index = () => {
   const feedbackConfig = {
     ...STANDARD_PRESET,
-    appName: 'Feedback Spark Demo',
+    appName: 'Feedback Chatbot Demo',
     position: 'bottom-right' as const,
   };
 
@@ -20,14 +20,17 @@ const Index = () => {
         <div className="relative max-w-6xl mx-auto px-6 py-24 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
             <Sparkles className="w-4 h-4" />
-            <span className="text-sm font-medium">Open Source Template</span>
+            <span className="text-sm font-medium">AI-Powered Template</span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
-            Feedback Spark
+          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-4">
+            Feedback Chatbot
           </h1>
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-2">
+            A template for the AI Feedback Chatbot system
+          </p>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            A modular, drop-in feedback collection system for React + Supabase projects. 
-            Collect user feedback in minutes, not days.
+            Drop this into any React + Supabase project to collect, organize, and act on user feedback. 
+            AI interprets issues and generates prompts you can paste directly into Lovable.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" asChild>
@@ -135,7 +138,7 @@ const Index = () => {
           {/* Workflow Explanation */}
           <div className="mt-12 p-8 rounded-2xl bg-card border border-border">
             <h3 className="text-xl font-semibold text-card-foreground mb-4 text-center">
-              The Feedback Spark Workflow
+              The Feedback Chatbot Workflow
             </h3>
             <div className="grid md:grid-cols-4 gap-6 text-center">
               <div>
@@ -273,7 +276,7 @@ import { STANDARD_PRESET } from '@/feedback/config/feedback.config';
       <footer className="border-t border-border py-8">
         <div className="max-w-6xl mx-auto px-6 text-center text-muted-foreground">
           <p>
-            Feedback Spark • MIT License • 
+            Feedback Chatbot • MIT License • 
             <a href="https://github.com/thecardsguy/feedback-spark" className="text-primary hover:underline ml-1">
               View on GitHub
             </a>
