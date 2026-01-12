@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      feedback: {
+        Row: {
+          ai_category: string | null
+          ai_question_for_dev: string | null
+          ai_summary: string | null
+          category: string | null
+          context: Json | null
+          created_at: string | null
+          device_type: string | null
+          id: string
+          page_url: string | null
+          raw_text: string
+          severity: string | null
+          status: string | null
+          target_element: Json | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ai_category?: string | null
+          ai_question_for_dev?: string | null
+          ai_summary?: string | null
+          category?: string | null
+          context?: Json | null
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          page_url?: string | null
+          raw_text: string
+          severity?: string | null
+          status?: string | null
+          target_element?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ai_category?: string | null
+          ai_question_for_dev?: string | null
+          ai_summary?: string | null
+          category?: string | null
+          context?: Json | null
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          page_url?: string | null
+          raw_text?: string
+          severity?: string | null
+          status?: string | null
+          target_element?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
