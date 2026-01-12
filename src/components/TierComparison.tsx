@@ -2,15 +2,33 @@
  * Tier Comparison Table
  *
  * Visual comparison of Basic, Standard, and Pro tiers with checkmarks.
- * Includes export functionality for image and PDF downloads.
+ * Includes export functionality for image and PDF downloads with settings modal.
  */
 
 import { useRef, useState } from 'react';
-import { Check, X, Sparkles, Download, Image, FileText } from 'lucide-react';
+import { Check, X, Sparkles, Download, Image, FileText, Settings2 } from 'lucide-react';
 import { getHtml2Canvas, getJsPDF } from '@/lib/vendorScripts';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +52,12 @@ interface Feature {
   pro: boolean;
 }
 
+interface ExportSettings {
+  scale: number;
+  pageSize: 'auto' | 'a4' | 'letter' | 'a3';
+  includeBackground: boolean;
+}
+
 const FEATURES: Feature[] = [
   // User Features
   { name: 'Floating Button', description: 'Customizable feedback trigger', basic: true, standard: true, pro: true },
@@ -52,6 +76,13 @@ const FEATURES: Feature[] = [
   { name: 'AI Categorization', description: 'Smart category detection', basic: false, standard: false, pro: true },
   { name: 'Developer Prompts', description: 'AI-generated fix prompts', basic: false, standard: false, pro: true },
 ];
+
+const PAGE_SIZES = {
+  auto: { label: 'Auto (fit content)', width: null, height: null },
+  a4: { label: 'A4 (210 × 297mm)', width: 595, height: 842 },
+  letter: { label: 'Letter (8.5 × 11in)', width: 612, height: 792 },
+  a3: { label: 'A3 (297 × 420mm)', width: 842, height: 1191 },
+};
 
 const FeatureCheck = ({ enabled }: { enabled: boolean }) => (
   enabled ? (
@@ -72,6 +103,12 @@ const FeatureCheck = ({ enabled }: { enabled: boolean }) => (
 const TierComparison = () => {
   const tableRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [exportSettings, setExportSettings] = useState<ExportSettings>({
+    scale: 2,
+    pageSize: 'auto',
+    includeBackground: true,
+  });
 
   const exportAsImage = async () => {
     if (!tableRef.current) return;
@@ -79,8 +116,8 @@ const TierComparison = () => {
     try {
       const html2canvas = await getHtml2Canvas();
       const canvas = await html2canvas(tableRef.current, {
-        backgroundColor: '#ffffff',
-        scale: 2,
+        backgroundColor: exportSettings.includeBackground ? '#ffffff' : null,
+        scale: exportSettings.scale,
       });
       const link = document.createElement('a');
       link.download = 'tier-comparison.png';
@@ -101,17 +138,50 @@ const TierComparison = () => {
       const JsPDF = await getJsPDF();
 
       const canvas = await html2canvas(tableRef.current, {
-        backgroundColor: '#ffffff',
-        scale: 2,
+        backgroundColor: exportSettings.includeBackground ? '#ffffff' : null,
+        scale: exportSettings.scale,
       });
 
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new JsPDF({
+      const pageConfig = PAGE_SIZES[exportSettings.pageSize];
+      
+      const pdfOptions: any = {
         orientation: 'landscape',
         unit: 'px',
-        format: [canvas.width, canvas.height],
-      });
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      };
+
+      if (pageConfig.width && pageConfig.height) {
+        pdfOptions.format = [pageConfig.height, pageConfig.width]; // landscape swap
+      } else {
+        pdfOptions.format = [canvas.width, canvas.height];
+      }
+
+      const pdf = new JsPDF(pdfOptions);
+      
+      if (pageConfig.width && pageConfig.height) {
+        // Scale image to fit page
+        const pdfWidth = pageConfig.height; // landscape
+        const pdfHeight = pageConfig.width;
+        const imgRatio = canvas.width / canvas.height;
+        const pdfRatio = pdfWidth / pdfHeight;
+        
+        let finalWidth = pdfWidth;
+        let finalHeight = pdfHeight;
+        
+        if (imgRatio > pdfRatio) {
+          finalHeight = pdfWidth / imgRatio;
+        } else {
+          finalWidth = pdfHeight * imgRatio;
+        }
+        
+        const xOffset = (pdfWidth - finalWidth) / 2;
+        const yOffset = (pdfHeight - finalHeight) / 2;
+        
+        pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
+      } else {
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      }
+      
       pdf.save('tier-comparison.pdf');
     } catch (error) {
       console.error('Error exporting PDF:', error);
@@ -133,24 +203,97 @@ const TierComparison = () => {
               <p className="text-sm text-muted-foreground">See what's included in each tier</p>
             </div>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" disabled={isExporting}>
-                <Download className="w-4 h-4 mr-2" />
-                {isExporting ? 'Exporting...' : 'Export'}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={exportAsImage}>
-                <Image className="w-4 h-4 mr-2" />
-                Download as Image (PNG)
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={exportAsPDF}>
-                <FileText className="w-4 h-4 mr-2" />
-                Download as PDF
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <Dialog open={showSettings} onOpenChange={setShowSettings}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Settings2 className="w-4 h-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md bg-background border-border">
+                <DialogHeader>
+                  <DialogTitle>Export Settings</DialogTitle>
+                  <DialogDescription>
+                    Configure how the comparison table is exported.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="scale">Resolution Scale</Label>
+                    <Select
+                      value={String(exportSettings.scale)}
+                      onValueChange={(v) => setExportSettings({ ...exportSettings, scale: Number(v) })}
+                    >
+                      <SelectTrigger id="scale" className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover border-border">
+                        <SelectItem value="1">1x (Standard)</SelectItem>
+                        <SelectItem value="2">2x (High quality)</SelectItem>
+                        <SelectItem value="3">3x (Very high)</SelectItem>
+                        <SelectItem value="4">4x (Maximum)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Higher scale = better quality, larger file size</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="pageSize">PDF Page Size</Label>
+                    <Select
+                      value={exportSettings.pageSize}
+                      onValueChange={(v) => setExportSettings({ ...exportSettings, pageSize: v as ExportSettings['pageSize'] })}
+                    >
+                      <SelectTrigger id="pageSize" className="bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover border-border">
+                        {Object.entries(PAGE_SIZES).map(([key, { label }]) => (
+                          <SelectItem key={key} value={key}>{label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">Only applies to PDF exports</p>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="background">Include Background</Label>
+                      <p className="text-xs text-muted-foreground">Add white background to export</p>
+                    </div>
+                    <Switch
+                      id="background"
+                      checked={exportSettings.includeBackground}
+                      onCheckedChange={(checked) => setExportSettings({ ...exportSettings, includeBackground: checked })}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowSettings(false)}>
+                    Done
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={isExporting}>
+                  <Download className="w-4 h-4 mr-2" />
+                  {isExporting ? 'Exporting...' : 'Export'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-popover border-border">
+                <DropdownMenuItem onClick={exportAsImage}>
+                  <Image className="w-4 h-4 mr-2" />
+                  Download as Image (PNG)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportAsPDF}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Download as PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
