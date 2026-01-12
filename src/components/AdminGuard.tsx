@@ -14,11 +14,15 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface AdminGuardProps {
   children: React.ReactNode;
-  /** Set to true to allow demo access without auth */
+  /** 
+   * SECURITY: Demo mode is disabled by default. 
+   * Only set to true for local development/testing.
+   * In production, always use demoMode=false.
+   */
   demoMode?: boolean;
 }
 
-export function AdminGuard({ children, demoMode = true }: AdminGuardProps) {
+export function AdminGuard({ children, demoMode = false }: AdminGuardProps) {
   const { user, isLoading, isAdmin } = useAuth();
 
   // Show loading state

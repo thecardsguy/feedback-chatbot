@@ -2,6 +2,7 @@
  * Signup Page
  * 
  * Simple email/password signup for new users.
+ * SECURITY: Input validation with zod schema
  */
 
 import { useState } from 'react';
@@ -13,6 +14,27 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, ArrowLeft, UserPlus, CheckCircle } from 'lucide-react';
+import { z } from 'zod';
+
+// SECURITY: Strict input validation schema
+const signupSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email({ message: 'Please enter a valid email address' })
+    .max(255, { message: 'Email must be less than 255 characters' }),
+  password: z
+    .string()
+    .min(8, { message: 'Password must be at least 8 characters' })
+    .max(128, { message: 'Password must be less than 128 characters' })
+    .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
+    .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter' })
+    .regex(/[0-9]/, { message: 'Password must contain at least one number' }),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
+});
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -28,20 +50,17 @@ export default function Signup() {
     e.preventDefault();
     setError(null);
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // SECURITY: Validate all inputs before submission
+    const validation = signupSchema.safeParse({ email, password, confirmPassword });
+    if (!validation.success) {
+      setError(validation.error.errors[0].message);
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const { error } = await signUp(email, password);
+      const { error } = await signUp(validation.data.email, validation.data.password);
       if (error) {
         setError(error.message);
       } else {
@@ -142,8 +161,11 @@ VALUES ('YOUR_USER_ID');`}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoComplete="new-password"
-                  minLength={6}
+                  minLength={8}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Min 8 characters with uppercase, lowercase, and number
+                </p>
               </div>
 
               <div className="space-y-2">

@@ -1,7 +1,9 @@
 /**
  * Admin authentication hook
  * 
- * This hook checks if the current user is an admin.
+ * This hook checks if the current user is an admin by querying the admin_users table.
+ * SECURITY: Admin status is verified server-side through RLS policies.
+ * 
  * For template users: Add your user_id to the admin_users table to enable admin access.
  */
 
@@ -41,31 +43,28 @@ export function useAdmin(): UseAdminReturn {
           setUserId(session.user.id);
         }
 
-        // Check if user is in admin_users table
-        const { data, error: adminError } = await supabase
-          .from('admin_users')
-          .select('id')
-          .eq('user_id', session.user.id)
-          .maybeSingle();
+        // SECURITY: Use the is_admin() database function for secure server-side check
+        // This function runs with SECURITY DEFINER and checks the admin_users table
+        const { data, error: adminError } = await supabase.rpc('is_admin');
 
         if (mounted) {
           if (adminError) {
-            // Table might not exist yet - for demo purposes, allow access
-            console.log('Admin check: Table not found or error, allowing demo access');
-            setIsAdmin(true);
-            setError(null);
+            // SECURITY: On error, deny access - never allow by default
+            console.error('Admin check failed:', adminError.message);
+            setIsAdmin(false);
+            setError('Unable to verify admin status');
           } else {
-            setIsAdmin(!!data);
+            setIsAdmin(data === true);
             setError(null);
           }
           setIsLoading(false);
         }
       } catch (err) {
         if (mounted) {
-          // For demo purposes, allow access if there's an error
-          console.log('Admin check error, allowing demo access:', err);
-          setIsAdmin(true);
-          setError(null);
+          // SECURITY: On error, deny access - never allow by default
+          console.error('Admin check error:', err);
+          setIsAdmin(false);
+          setError('Unable to verify admin status');
           setIsLoading(false);
         }
       }

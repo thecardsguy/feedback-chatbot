@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button';
 import { AdminGuard } from '@/components/AdminGuard';
 
 const Admin = () => {
+  // SECURITY: demoMode is false by default for production security
+  // Set to true only for local development/testing purposes
   return (
-    <AdminGuard demoMode={true}>
+    <AdminGuard demoMode={false}>
       {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
