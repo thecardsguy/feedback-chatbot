@@ -2,7 +2,7 @@
  * Feedback Widget - Feedback Button
  * 
  * The main entry point for users. A floating button that opens the feedback form.
- * Fully customizable via config.
+ * Supports dark mode via .dark class or data-theme="dark".
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -68,6 +68,43 @@ const Icons = {
 };
 
 // ============================================
+// DARK MODE DETECTION
+// ============================================
+
+function useIsDarkMode(): boolean {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const html = document.documentElement;
+      const isDarkMode = 
+        html.classList.contains('dark') || 
+        html.getAttribute('data-theme') === 'dark' ||
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDark(isDarkMode);
+    };
+
+    checkDarkMode();
+    
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, { 
+      attributes: true, 
+      attributeFilter: ['class', 'data-theme'] 
+    });
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkDarkMode);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', checkDarkMode);
+    };
+  }, []);
+
+  return isDark;
+}
+
+// ============================================
 // POSITION STYLES
 // ============================================
 
@@ -131,6 +168,7 @@ export function FeedbackButton({ config, className }: FeedbackButtonProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const { submit } = useFeedback({ aiEnabled: config.ai?.enabled });
+  const isDarkMode = useIsDarkMode();
 
   // Handle escape key to close
   useEffect(() => {
@@ -173,6 +211,14 @@ export function FeedbackButton({ config, className }: FeedbackButtonProps) {
 
   const buttonColor = config.buttonColor || '#3b82f6';
   const modalPosition = getModalPosition(config.position);
+
+  // Theme-aware colors
+  const theme = {
+    modalBg: isDarkMode ? '#1f2937' : '#ffffff',
+    successText: '#22c55e',
+    successBg: isDarkMode ? '#052e16' : '#dcfce7',
+    mutedText: isDarkMode ? '#9ca3af' : '#6b7280',
+  };
 
   return (
     <div style={getPositionStyles(config.position)} className={className}>
@@ -222,9 +268,11 @@ export function FeedbackButton({ config, className }: FeedbackButtonProps) {
             style={{
               ...modalPosition.alignment,
               width: 360,
-              backgroundColor: 'white',
+              backgroundColor: theme.modalBg,
               borderRadius: 12,
-              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.12)',
+              boxShadow: isDarkMode 
+                ? '0 8px 30px rgba(0, 0, 0, 0.4)' 
+                : '0 8px 30px rgba(0, 0, 0, 0.12)',
               overflow: 'hidden',
               transformOrigin: modalPosition.origin,
             }}
@@ -239,7 +287,6 @@ export function FeedbackButton({ config, className }: FeedbackButtonProps) {
                   style={{
                     padding: 32,
                     textAlign: 'center',
-                    color: '#22c55e',
                   }}
                 >
                   <motion.div
@@ -250,17 +297,20 @@ export function FeedbackButton({ config, className }: FeedbackButtonProps) {
                       width: 64,
                       height: 64,
                       borderRadius: '50%',
-                      backgroundColor: '#dcfce7',
+                      backgroundColor: theme.successBg,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       margin: '0 auto 16px',
+                      color: theme.successText,
                     }}
                   >
                     <Icons.Check />
                   </motion.div>
-                  <div style={{ fontSize: 18, fontWeight: 600 }}>Thank you!</div>
-                  <div style={{ fontSize: 14, color: '#6b7280', marginTop: 4 }}>
+                  <div style={{ fontSize: 18, fontWeight: 600, color: theme.successText }}>
+                    Thank you!
+                  </div>
+                  <div style={{ fontSize: 14, color: theme.mutedText, marginTop: 4 }}>
                     Your feedback has been submitted.
                   </div>
                 </motion.div>

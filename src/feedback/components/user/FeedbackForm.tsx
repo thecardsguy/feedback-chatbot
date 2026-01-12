@@ -1,10 +1,10 @@
 /**
  * Feedback Widget - Feedback Form
  * 
- * Clean form with smooth animations. Supports categories, severity, and element targeting.
+ * Clean form with smooth animations and dark mode support.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ElementPicker } from './ElementPicker';
 import type { 
@@ -47,6 +47,43 @@ const Icons = {
 };
 
 // ============================================
+// DARK MODE DETECTION
+// ============================================
+
+function useIsDarkMode(): boolean {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const html = document.documentElement;
+      const isDarkMode = 
+        html.classList.contains('dark') || 
+        html.getAttribute('data-theme') === 'dark' ||
+        window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setIsDark(isDarkMode);
+    };
+
+    checkDarkMode();
+    
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, { 
+      attributes: true, 
+      attributeFilter: ['class', 'data-theme'] 
+    });
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkDarkMode);
+
+    return () => {
+      observer.disconnect();
+      mediaQuery.removeEventListener('change', checkDarkMode);
+    };
+  }, []);
+
+  return isDark;
+}
+
+// ============================================
 // OPTIONS
 // ============================================
 
@@ -66,6 +103,24 @@ const SEVERITIES: { value: FeedbackSeverity; label: string; color: string }[] = 
 ];
 
 // ============================================
+// THEME HELPER
+// ============================================
+
+const getTheme = (isDark: boolean) => ({
+  text: isDark ? '#f9fafb' : '#111827',
+  textMuted: isDark ? '#9ca3af' : '#6b7280',
+  textSecondary: isDark ? '#d1d5db' : '#374151',
+  bg: isDark ? '#1f2937' : '#ffffff',
+  bgSecondary: isDark ? '#374151' : '#f9fafb',
+  bgHover: isDark ? '#4b5563' : '#f3f4f6',
+  border: isDark ? '#4b5563' : '#e5e7eb',
+  borderLight: isDark ? '#374151' : '#d1d5db',
+  primary: '#3b82f6',
+  primaryBg: isDark ? '#1e3a5f' : '#eff6ff',
+  primaryBorder: isDark ? '#3b82f6' : '#bfdbfe',
+});
+
+// ============================================
 // FEEDBACK FORM COMPONENT
 // ============================================
 
@@ -75,6 +130,8 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
   const [severity, setSeverity] = useState<FeedbackSeverity>('medium');
   const [targetElement, setTargetElement] = useState<TargetElement | null>(null);
   const [isPickingElement, setIsPickingElement] = useState(false);
+  const isDarkMode = useIsDarkMode();
+  const theme = getTheme(isDarkMode);
 
   const handleElementSelect = useCallback((element: TargetElement) => {
     setTargetElement(element);
@@ -97,6 +154,7 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
   };
 
   const buttonColor = config.buttonColor || '#3b82f6';
+  const styles = getStyles(theme);
 
   return (
     <>
@@ -138,8 +196,8 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
                   onClick={() => setCategory(cat.value)}
                   style={{
                     ...styles.categoryButton,
-                    borderColor: category === cat.value ? '#3b82f6' : 'transparent',
-                    backgroundColor: category === cat.value ? '#eff6ff' : '#f9fafb',
+                    borderColor: category === cat.value ? theme.primary : 'transparent',
+                    backgroundColor: category === cat.value ? theme.primaryBg : theme.bgSecondary,
                   }}
                 >
                   <span style={{ fontSize: 16 }}>{cat.emoji}</span>
@@ -167,9 +225,9 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
                   onClick={() => setSeverity(sev.value)}
                   style={{
                     ...styles.severityButton,
-                    borderColor: severity === sev.value ? sev.color : '#e5e7eb',
+                    borderColor: severity === sev.value ? sev.color : theme.border,
                     backgroundColor: severity === sev.value ? `${sev.color}15` : 'transparent',
-                    color: severity === sev.value ? sev.color : '#6b7280',
+                    color: severity === sev.value ? sev.color : theme.textMuted,
                   }}
                 >
                   {sev.label}
@@ -240,7 +298,7 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  whileHover={{ borderColor: '#3b82f6' }}
+                  whileHover={{ borderColor: theme.primary }}
                   style={styles.pickElementButton}
                 >
                   <Icons.Target />
@@ -262,7 +320,7 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
           whileTap={!text.trim() || isSubmitting ? {} : { scale: 0.98 }}
           style={{
             ...styles.submitButton,
-            backgroundColor: !text.trim() || isSubmitting ? '#d1d5db' : buttonColor,
+            backgroundColor: !text.trim() || isSubmitting ? theme.border : buttonColor,
             cursor: !text.trim() || isSubmitting ? 'not-allowed' : 'pointer',
           }}
         >
@@ -290,10 +348,10 @@ export function FeedbackForm({ config, onSubmit, onCancel, isSubmitting }: Feedb
 }
 
 // ============================================
-// STYLES
+// STYLES FACTORY
 // ============================================
 
-const styles: Record<string, React.CSSProperties> = {
+const getStyles = (theme: ReturnType<typeof getTheme>): Record<string, React.CSSProperties> => ({
   form: {
     display: 'flex',
     flexDirection: 'column',
@@ -314,7 +372,7 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
     fontSize: 18,
     fontWeight: 600,
-    color: '#111827',
+    color: theme.text,
   },
   aiBadge: {
     display: 'flex',
@@ -323,7 +381,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '2px 8px',
     fontSize: 11,
     fontWeight: 600,
-    background: '#3b82f6',
+    background: theme.primary,
     color: 'white',
     borderRadius: 12,
   },
@@ -336,7 +394,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 6,
-    color: '#6b7280',
+    color: theme.textMuted,
   },
   section: {
     display: 'flex',
@@ -349,11 +407,11 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     fontSize: 13,
     fontWeight: 500,
-    color: '#374151',
+    color: theme.textSecondary,
   },
   charCount: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: theme.textMuted,
     fontWeight: 400,
   },
   categoryGrid: {
@@ -369,14 +427,13 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '10px 4px',
     border: '2px solid transparent',
     borderRadius: 8,
-    background: '#f9fafb',
     cursor: 'pointer',
     transition: 'all 0.15s',
   },
   categoryLabel: {
     fontSize: 10,
     fontWeight: 500,
-    color: '#6b7280',
+    color: theme.textMuted,
   },
   severityGrid: {
     display: 'grid',
@@ -385,7 +442,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   severityButton: {
     padding: '8px 10px',
-    border: '1px solid #e5e7eb',
+    border: '1px solid',
     borderRadius: 6,
     background: 'transparent',
     cursor: 'pointer',
@@ -396,14 +453,15 @@ const styles: Record<string, React.CSSProperties> = {
   textarea: {
     width: '100%',
     padding: 12,
-    border: '1px solid #e5e7eb',
+    border: `1px solid ${theme.border}`,
     borderRadius: 8,
     fontSize: 14,
     lineHeight: 1.5,
     resize: 'none',
     fontFamily: 'inherit',
     outline: 'none',
-    backgroundColor: '#f9fafb',
+    backgroundColor: theme.bgSecondary,
+    color: theme.text,
     boxSizing: 'border-box',
   },
   pickElementButton: {
@@ -412,12 +470,12 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     gap: 8,
     padding: '12px 16px',
-    border: '1px dashed #d1d5db',
+    border: `1px dashed ${theme.borderLight}`,
     borderRadius: 8,
     background: 'transparent',
     cursor: 'pointer',
     fontSize: 13,
-    color: '#6b7280',
+    color: theme.textMuted,
     transition: 'all 0.15s',
     width: '100%',
   },
@@ -426,15 +484,15 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '10px 12px',
-    backgroundColor: '#eff6ff',
-    border: '1px solid #bfdbfe',
+    backgroundColor: theme.primaryBg,
+    border: `1px solid ${theme.primaryBorder}`,
     borderRadius: 8,
   },
   elementInfo: {
     display: 'flex',
     alignItems: 'center',
     gap: 8,
-    color: '#3b82f6',
+    color: theme.primary,
   },
   elementTag: {
     fontWeight: 600,
@@ -442,7 +500,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   elementText: {
     fontSize: 12,
-    color: '#6b7280',
+    color: theme.textMuted,
     maxWidth: 150,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -457,7 +515,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 4,
-    color: '#6b7280',
+    color: theme.textMuted,
   },
   submitButton: {
     display: 'flex',
@@ -480,6 +538,6 @@ const styles: Record<string, React.CSSProperties> = {
     borderTopColor: 'white',
     borderRadius: '50%',
   },
-};
+});
 
 export default FeedbackForm;
