@@ -1,1 +1,10 @@
 project_id = "utapcrvduextlzahfesv"
+
+[functions.submit-feedback]
+verify_jwt = false
+
+[functions.submit-feedback-ai]
+verify_jwt = false
+
+[functions.health-check]
+verify_jwt = false
