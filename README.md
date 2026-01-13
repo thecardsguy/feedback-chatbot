@@ -2,15 +2,24 @@
 
 > **A template for the AI Feedback Chatbot system** — Drop this into any React + Supabase project to collect, organize, and act on user feedback. AI interprets issues and generates prompts you can paste directly into Lovable.
 
+<!-- Quick Links -->
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_App-blue?style=for-the-badge)](https://feedback-chatbot.lovable.app)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/thecardsguy/feedback-chatbot)
 
-![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
-![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)
-![React](https://img.shields.io/badge/React-18.x-61dafb.svg)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6.svg)
-![Supabase](https://img.shields.io/badge/Supabase-Ready-3ecf8e.svg)
-![Lovable](https://img.shields.io/badge/Made_with-Lovable-ff69b4.svg)
+<!-- Status Badges (Dynamic) -->
+[![Version](https://img.shields.io/github/v/release/thecardsguy/feedback-chatbot?style=flat-square&label=version&color=blue)](https://github.com/thecardsguy/feedback-chatbot/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/thecardsguy/feedback-chatbot/ci.yml?branch=main&style=flat-square&label=build)](https://github.com/thecardsguy/feedback-chatbot/actions)
+[![License](https://img.shields.io/github/license/thecardsguy/feedback-chatbot?style=flat-square)](LICENSE)
+
+<!-- Tech Stack Badges -->
+[![React](https://img.shields.io/badge/React-18.x-61dafb?style=flat-square&logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.x-38bdf8?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Supabase](https://img.shields.io/badge/Supabase-Ready-3ecf8e?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com)
+
+<!-- Lovable Badges -->
+[![Made with Lovable](https://img.shields.io/badge/Made_with-Lovable-ff69b4?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjFsLTEuNS0xLjM1QzUuNCAxNS4zNiAyIDEyLjI4IDIgOC41IDIgNS40MiA0LjQyIDMgNy41IDNjMS43NCAwIDMuNDEuODEgNC41IDIuMDlDMTMuMDkgMy44MSAxNC43NiAzIDE2LjUgMyAxOS41OCAzIDIyIDUuNDIgMjIgOC41YzAgMy43OC0zLjQgNi44Ni04LjU1IDExLjE1TDEyIDIxeiIgZmlsbD0iI2ZmNjliNCIvPjwvc3ZnPg==)](https://lovable.dev)
+[![Lovable Cloud Ready](https://img.shields.io/badge/Lovable-Cloud_Ready-blueviolet?style=flat-square)](https://docs.lovable.dev/features/cloud)
 
 ---
 
@@ -411,11 +420,15 @@ The Pro tier uses **Lovable AI** (no API key needed when using Lovable Cloud) fo
 
 ## 📖 Examples
 
-See the `feedback-widget-template/examples/` directory:
+See the [`examples/`](./examples/) directory for complete, copy-paste ready integration patterns:
 
-- `basic-setup.tsx` — Minimal implementation
-- `with-auth.tsx` — With user authentication
-- `pro-tier.tsx` — Full AI features
+| Example | Description |
+|---------|-------------|
+| [`basic-tier.tsx`](./examples/basic-tier.tsx) | Minimal zero-config setup |
+| [`standard-tier.tsx`](./examples/standard-tier.tsx) | Admin dashboard integration |
+| [`pro-tier.tsx`](./examples/pro-tier.tsx) | Full AI-powered workflow |
+| [`custom-integration.tsx`](./examples/custom-integration.tsx) | Advanced customization patterns |
+| [`with-auth.tsx`](./examples/with-auth.tsx) | User authentication integration |
 
 ---
 
