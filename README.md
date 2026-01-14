@@ -1,6 +1,25 @@
 # Feedback Chatbot
 
-> **A template for the AI Feedback Chatbot system** — Drop this into any React + Supabase project to collect, organize, and act on user feedback. AI interprets issues and generates prompts you can paste directly into Lovable.
+<!-- PROJECT LOGO -->
+<div align="center">
+  <a href="https://feedback-chatbot.lovable.app">
+    <img src="docs/images/hero-screenshot.png" alt="Feedback Widget Template - AI-Powered Feedback Collection" width="800">
+  </a>
+
+  <h3 align="center">🎯 Feedback Widget Template</h3>
+
+  <p align="center">
+    Drop-in AI-powered feedback collection for React + Supabase apps
+    <br />
+    <a href="https://feedback-chatbot.lovable.app"><strong>🚀 View Live Demo</strong></a>
+    ·
+    <a href="#-quick-start"><strong>📦 Quick Start</strong></a>
+    ·
+    <a href="https://github.com/thecardsguy/feedback-chatbot/issues"><strong>🐛 Report Bug</strong></a>
+  </p>
+</div>
+
+<br />
 
 <!-- Quick Links -->
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_App-blue?style=for-the-badge)](https://feedback-chatbot.lovable.app)
@@ -20,6 +39,40 @@
 <!-- Lovable Badges -->
 [![Made with Lovable](https://img.shields.io/badge/Made_with-Lovable-ff69b4?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjFsLTEuNS0xLjM1QzUuNCAxNS4zNiAyIDEyLjI4IDIgOC41IDIgNS40MiA0LjQyIDMgNy41IDNjMS43NCAwIDMuNDEuODEgNC41IDIuMDlDMTMuMDkgMy44MSAxNC43NiAzIDE2LjUgMyAxOS41OCAzIDIyIDUuNDIgMjIgOC41YzAgMy43OC0zLjQgNi44Ni04LjU1IDExLjE1TDEyIDIxeiIgZmlsbD0iI2ZmNjliNCIvPjwvc3ZnPg==)](https://lovable.dev)
 [![Lovable Cloud Ready](https://img.shields.io/badge/Lovable-Cloud_Ready-blueviolet?style=flat-square)](https://docs.lovable.dev/features/cloud)
+
+---
+
+## 🎬 Demo
+
+<div align="center">
+  <img src="docs/images/demo.gif" alt="Feedback Widget Demo - Submit feedback with AI-powered categorization" width="700">
+  <br />
+  <em>Submit feedback with AI-powered categorization in seconds</em>
+</div>
+
+---
+
+<!-- TABLE OF CONTENTS -->
+<details>
+<summary><strong>📋 Table of Contents</strong></summary>
+
+- [Demo](#-demo)
+- [Why Use This Template?](#-why-use-this-template)
+- [Features](#-features)
+- [Screenshots](#-screenshots)
+- [Demo Mode & Setup Wizard](#-demo-mode--setup-wizard)
+- [Quick Start](#-quick-start)
+- [Project Structure](#-project-structure)
+- [Configuration](#%EF%B8%8F-configuration)
+- [Customization](#-customization)
+- [Security](#-security)
+- [AI Features](#-ai-features-pro-tier)
+- [Examples](#-examples)
+- [Development](#%EF%B8%8F-development)
+- [License](#-license)
+- [Support](#-support)
+
+</details>
 
 ---
 
@@ -67,6 +120,45 @@ This template turns your feedback collection into an **AI-powered issue tracker*
 - 🎯 **Optimistic UI** — Instant feedback with automatic rollback on errors
 - 📱 **Enhanced Mobile UX** — Touch-friendly 44px targets, responsive layouts
 - 🎙️ **Voice Search** — Speech-to-text for AI code search (admin only)
+
+---
+
+## 📸 Screenshots
+
+<details>
+<summary><strong>Click to expand screenshots</strong></summary>
+
+<br />
+
+### Feedback Widget
+
+<div align="center">
+  <img src="docs/images/feedback-widget.png" alt="Feedback Widget - Beautiful glassmorphism design" width="400">
+  <br />
+  <em>Beautiful glassmorphism design with smooth animations</em>
+</div>
+
+<br />
+
+### Element Picker
+
+<div align="center">
+  <img src="docs/images/element-picker.png" alt="Element Picker - Click anywhere to highlight the exact element" width="700">
+  <br />
+  <em>Click anywhere to highlight the exact element with an issue</em>
+</div>
+
+<br />
+
+### Admin Dashboard
+
+<div align="center">
+  <img src="docs/images/admin-dashboard.png" alt="Admin Dashboard - Manage all feedback with AI-generated summaries" width="700">
+  <br />
+  <em>Manage all feedback with AI-generated summaries and developer prompts</em>
+</div>
+
+</details>
 
 ---
 
@@ -472,4 +564,11 @@ MIT License — See [LICENSE](./LICENSE) for details.
 
 ---
 
-**Made with ❤️ for the Lovable community**
+<div align="center">
+  <strong>Made with ❤️ for the Lovable community</strong>
+  <br />
+  <br />
+  <a href="https://lovable.dev">
+    <img src="https://img.shields.io/badge/Built_with-Lovable-ff69b4?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjFsLTEuNS0xLjM1QzUuNCAxNS4zNiAyIDEyLjI4IDIgOC41IDIgNS40MiA0LjQyIDMgNy41IDNjMS43NCAwIDMuNDEuODEgNC41IDIuMDlDMTMuMDkgMy44MSAxNC43NiAzIDE2LjUgMyAxOS41OCAzIDIyIDUuNDIgMjIgOC41YzAgMy43OC0zLjQgNi44Ni04LjU1IDExLjE1TDEyIDIxeiIgZmlsbD0iI2ZmNjliNCIvPjwvc3ZnPg==" alt="Built with Lovable">
+  </a>
+</div>

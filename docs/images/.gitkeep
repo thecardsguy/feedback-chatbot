@@ -1,0 +1,13 @@
+# Placeholder for documentation images
+
+Add your screenshots and demo GIF here:
+- hero-screenshot.png (1280x720px) - Landing page hero shot
+- demo.gif (800x600px, 15-30 seconds) - Widget interaction demo
+- feedback-widget.png (400x600px) - Close-up of feedback form
+- element-picker.png (800x500px) - Element selection in action
+- admin-dashboard.png (1280x720px) - Admin dashboard overview
+
+Recommended tools:
+- Screenshots: Browser DevTools device toolbar
+- GIF Recording: ScreenToGif (Windows), Kap (Mac), LICEcap
+- Optimization: ezgif.com (keep GIFs under 5MB)
