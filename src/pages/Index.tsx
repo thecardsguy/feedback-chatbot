@@ -4,7 +4,7 @@
  */
 
 import { FeedbackWidget } from '@/feedback';
-import { Navbar } from '@/components/Navbar';
+import { Navbar } from '@/components/common';
 import AccuracyTest from '@/components/AccuracyTest';
 import {
   HeroSection,

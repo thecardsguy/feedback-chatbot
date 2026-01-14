@@ -8,7 +8,7 @@ import { Package, Github, Sparkles, Download, ArrowRight, ExternalLink, Check } 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import SetupGuide from '@/components/SetupGuide';
+import { SetupGuide } from '@/components/setup';
 
 interface DownloadOption {
   icon: typeof Github;

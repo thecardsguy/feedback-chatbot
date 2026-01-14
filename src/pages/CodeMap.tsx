@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Search, FileCode, Layers, BarChart3 } from "lucide-react";
-import { Navbar } from "@/components/Navbar";
+import { Navbar } from "@/components/common";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CategoryFilter } from "@/components/codemap/CategoryFilter";

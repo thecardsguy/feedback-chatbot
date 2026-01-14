@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Loader2, Database, Bot, ArrowRight, RefreshCw, Zap, Play } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
+import { Navbar } from '@/components/common';
 
 interface HealthStatus {
   database: { ok: boolean; message: string };

@@ -27,9 +27,9 @@ import {
   Settings,
   Download,
 } from 'lucide-react';
-import SetupVerification from './SetupVerification';
-import OnboardingWizard from './OnboardingWizard';
-import DownloadTemplate from './DownloadTemplate';
+import { SetupVerification } from './SetupVerification';
+import { OnboardingWizard } from '@/components/auth';
+import DownloadTemplate from '@/components/DownloadTemplate';
 
 interface FileNode {
   name: string;

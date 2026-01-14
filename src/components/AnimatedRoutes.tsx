@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
-import { PageTransition } from "./PageTransition";
+import { PageTransition } from "./common";
 import Index from "@/pages/Index";
 import Admin from "@/pages/Admin";
 import Setup from "@/pages/Setup";
