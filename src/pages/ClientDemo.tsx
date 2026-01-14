@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MessageSquare, Code, Zap, Shield, Copy, Check, ExternalLink, Sparkles, MousePointer2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Navbar } from '@/components/Navbar';
 
 const ClientDemo = () => {
   const [copied, setCopied] = useState(false);
@@ -82,41 +83,37 @@ const config = getFeedbackConfig({
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
+      
       {/* Background effects */}
       <div className="fixed inset-0 gradient-hero pointer-events-none" />
       <div className="fixed inset-0 gradient-mesh opacity-40 pointer-events-none" />
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 glass border-b border-border/50">
-        <div className="container-custom py-4 flex items-center justify-between">
+      {/* Demo Header Bar */}
+      <div className="relative border-b border-border/50 glass">
+        <div className="container-custom py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
-              <MessageSquare className="w-5 h-5 text-primary-foreground" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md">
+              <MessageSquare className="w-4 h-4 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-semibold text-foreground">YourApp</h1>
+              <p className="text-sm font-medium text-foreground">YourApp</p>
               <p className="text-xs text-muted-foreground">Sample Client Application</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:flex items-center gap-1">
-              View Admin Dashboard
-              <ExternalLink className="w-3 h-3" />
-            </Link>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setWidgetPosition(p => p === 'bottom-right' ? 'bottom-left' : 'bottom-right')}
-              className="glass"
-            >
-              Toggle Position
-            </Button>
-          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setWidgetPosition(p => p === 'bottom-right' ? 'bottom-left' : 'bottom-right')}
+            className="glass"
+          >
+            Toggle Position
+          </Button>
         </div>
-      </header>
+      </div>
 
       {/* Hero Section */}
-      <section className="relative container-custom py-20 md:py-32">
+      <section className="relative container-custom py-20 md:py-28">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AccuracyTest from '@/components/AccuracyTest';
 import SetupGuide from '@/components/SetupGuide';
 import TierComparison from '@/components/TierComparison';
+import { Navbar } from '@/components/Navbar';
 
 const Index = () => {
   const [copied, setCopied] = useState<string | null>(null);
@@ -109,8 +110,10 @@ const config = createConfig({
 
   return (
     <div className="min-h-screen bg-background">
+      <Navbar />
+      
       {/* Hero Section */}
-      <header className="relative overflow-hidden">
+      <section className="relative overflow-hidden">
         {/* Background effects */}
         <div className="absolute inset-0 gradient-hero" />
         <div className="absolute inset-0 gradient-mesh opacity-60" />
@@ -176,7 +179,7 @@ const config = createConfig({
             </motion.div>
           </motion.div>
         </div>
-      </header>
+      </section>
 
       {/* Quick Start Section */}
       <section className="relative border-y border-border/50 bg-card/50 backdrop-blur-sm">
