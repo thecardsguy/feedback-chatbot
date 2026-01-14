@@ -1,8 +1,8 @@
 import { FeedbackDashboard } from '@/feedback';
 import { STANDARD_PRESET } from '@/feedback/config/feedback.config';
 import { Shield } from 'lucide-react';
-import { AdminGuard } from '@/components/AdminGuard';
-import { Navbar } from '@/components/Navbar';
+import { AdminGuard } from '@/components/auth';
+import { Navbar } from '@/components/common';
 
 const Admin = () => {
   return (

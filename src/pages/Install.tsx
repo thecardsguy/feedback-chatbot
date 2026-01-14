@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Download, Smartphone, CheckCircle2, Share, Plus, MoreVertical, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Navbar } from '@/components/Navbar';
+import { Navbar } from '@/components/common';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;

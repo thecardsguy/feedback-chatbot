@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MessageSquare, Code, Zap, Shield, Copy, Check, ExternalLink, Sparkles, MousePointer2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Navbar } from '@/components/Navbar';
+import { Navbar } from '@/components/common';
 
 const ClientDemo = () => {
   const [copied, setCopied] = useState(false);

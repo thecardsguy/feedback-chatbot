@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Shield } from 'lucide-react';
 import { z } from 'zod';
-import { Navbar } from '@/components/Navbar';
+import { Navbar } from '@/components/common';
 
 // SECURITY: Strict input validation schema
 const loginSchema = z.object({
